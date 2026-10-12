@@ -1,0 +1,17 @@
+# Render Blueprint: New > Blueprint in the Render dashboard, pick this repository.
+services:
+  - type: web
+    name: fleetboard
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      # Optional: shared password for the demo (any user name). Leave empty for open access.
+      - key: FLEET_DEMO_PASSWORD
+        sync: false
+      # Optional: turns on Claude answers. Anyone who can open the demo can spend these credits,
+      # so set FLEET_DEMO_PASSWORD too.
+      - key: ANTHROPIC_API_KEY
+        sync: false

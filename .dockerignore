@@ -1,0 +1,9 @@
+**/node_modules
+**/dist
+**/target
+**/.idea
+**/*.iml
+data
+backend/data
+.claude
+.git
