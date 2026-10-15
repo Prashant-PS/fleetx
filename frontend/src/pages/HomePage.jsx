@@ -42,7 +42,6 @@ export default function HomePage({ userName, aiEnabled }) {
             {firstName ? `Hi ${firstName},` : 'Hi there,'}
             <span>how can I help with your fleet today?</span>
           </h1>
-          <p className="hero-sub">Ask a question, get insights, and act on them, all in one place.</p>
         </div>
         <div className="hero-art" aria-hidden>
           <img src="/fleet-bharat-emblem.png" alt="" className="hero-emblem" width="150" height="150" />
