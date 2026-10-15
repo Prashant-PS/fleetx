@@ -26,7 +26,10 @@ export default function Shell({ path, user, onRename, children }) {
     <div className="shell">
       <aside className={menuOpen ? 'sidebar open' : 'sidebar'}>
         <Link to="/" className="brand">
-          <span className="brand-name">Fleetboard <em>AI+</em></span>
+          <span className="brand-logo">
+            <img src="/fleet-bharat-logo.png" alt="Fleet Bharat" width="168" height="46" />
+            <em>AI+</em>
+          </span>
           <span className="brand-tag">Smarter fleets, fewer surprises.</span>
         </Link>
         <nav>

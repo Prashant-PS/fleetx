@@ -46,7 +46,7 @@ function Root() {
   if (path === '/search') {
     return (
       <>
-        <Link to="/" className="back-to-ai">✦ Fleetboard AI+</Link>
+        <Link to="/" className="back-to-ai">✦ Fleet Bharat AI+</Link>
         <ClassicSearch key={query.toString()} />
       </>
     );
@@ -88,7 +88,7 @@ function Page({ path, query, me, aiEnabled }) {
       return (
         <div className="page">
           <h1>Page not found</h1>
-          <Link to="/">Go to Fleetboard AI+</Link>
+          <Link to="/">Go to Fleet Bharat AI+</Link>
         </div>
       );
   }

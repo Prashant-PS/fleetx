@@ -7,15 +7,11 @@
   --border: #dfe1e5;
   --link: #1a0dab;
   --link-visited: #681da8;
-  --accent: #1a73e8;
+  --accent: #c90f14;
   --shadow: 0 1px 6px rgba(32, 33, 36, 0.28);
-  --answer-bg: #f0f4fc;
-  --ai-bg: #f3f6fd;
-  --ai-border: #d3e3fd;
-  --logo-0: #4285f4;
-  --logo-1: #ea4335;
-  --logo-2: #fbbc05;
-  --logo-3: #34a853;
+  --answer-bg: #fdf2f1;
+  --ai-bg: #fef6f5;
+  --ai-border: #f4d3d1;
   color-scheme: light;
 }
 
@@ -29,11 +25,11 @@
     --border: #5f6368;
     --link: #8ab4f8;
     --link-visited: #c58af9;
-    --accent: #8ab4f8;
+    --accent: #ff8a80;
     --shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
-    --answer-bg: #2a2f3a;
-    --ai-bg: #262b35;
-    --ai-border: #3c4a63;
+    --answer-bg: #352829;
+    --ai-bg: #2f2526;
+    --ai-border: #5a3438;
     color-scheme: dark;
   }
 }
@@ -51,13 +47,9 @@ body {
 button { font: inherit; color: inherit; }
 
 /* ---------- logo ---------- */
-.logo { font-family: 'Product Sans', 'Segoe UI', Arial, sans-serif; font-weight: 500; letter-spacing: -1px; user-select: none; }
-.logo.large { font-size: clamp(56px, 12vw, 88px); margin-bottom: 28px; }
-.logo.small { font-size: 28px; }
-.logo .c0 { color: var(--logo-0); }
-.logo .c1 { color: var(--logo-1); }
-.logo .c2 { color: var(--logo-2); }
-.logo .c3 { color: var(--logo-3); }
+.logo { display: block; height: auto; user-select: none; }
+.logo.large { width: min(420px, 80vw); margin-bottom: 28px; }
+.logo.small { width: 150px; }
 
 /* ---------- home ---------- */
 .home { min-height: 100vh; display: flex; flex-direction: column; }

@@ -14,7 +14,7 @@
     <groupId>com.fleetboard</groupId>
     <artifactId>fleetboard-search</artifactId>
     <version>1.0.0</version>
-    <name>Fleetboard Search</name>
+    <name>Fleet Bharat</name>
     <description>Search engine over the commercial vehicle feature matrix and STP workbook</description>
 
     <properties>

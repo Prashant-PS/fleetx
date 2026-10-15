@@ -50,7 +50,7 @@ public class NewsService {
 
     private static final Logger log = LoggerFactory.getLogger(NewsService.class);
 
-    private static final String USER_AGENT = "Mozilla/5.0 (compatible; FleetboardNews/1.0)";
+    private static final String USER_AGENT = "Mozilla/5.0 (compatible; FleetBharatNews/1.0)";
     private static final int MAX_ITEMS_PER_FEED = 40;
     private static final Pattern IMG_SRC = Pattern.compile("<img[^>]+src=[\"']([^\"']+)[\"']", Pattern.CASE_INSENSITIVE);
 

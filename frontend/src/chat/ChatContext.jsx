@@ -45,7 +45,7 @@ export function ChatProvider({ userName, children }) {
         controller.signal
       )
         .catch((e) => {
-          if (e.name !== 'AbortError') update(id, { error: 'Could not reach the Fleetboard server.' });
+          if (e.name !== 'AbortError') update(id, { error: 'Could not reach the Fleet Bharat server.' });
         })
         .finally(() => update(id, { streaming: false }));
     },

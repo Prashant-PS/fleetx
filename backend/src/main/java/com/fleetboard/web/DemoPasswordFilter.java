@@ -40,7 +40,7 @@ public class DemoPasswordFilter extends OncePerRequestFilter {
             chain.doFilter(request, response);
             return;
         }
-        response.setHeader("WWW-Authenticate", "Basic realm=\"Fleetboard demo\", charset=\"UTF-8\"");
+        response.setHeader("WWW-Authenticate", "Basic realm=\"Fleet Bharat demo\", charset=\"UTF-8\"");
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Password required");
     }
 

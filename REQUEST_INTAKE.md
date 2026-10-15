@@ -1,8 +1,8 @@
-# Request Intake: Fleetboard Search
+# Request Intake: Fleet Bharat
 
 ## 1. Summary
 
-Build a single-page, Google-style search web app called **Fleetboard** that answers questions about fleets
+Build a single-page, Google-style search web app called **Fleet Bharat** that answers questions about fleets
 and commercial vehicles. Use **React** for the frontend and **Java Spring Boot** for the backend.
 
 The landing page is an **AI+ assistant workspace** for fleet managers (§4.5). The Google-style search page stays available as "Classic search" at `/search`.
@@ -68,7 +68,7 @@ The app must stay fully usable with no API key, using only workbook answers and 
 ### 4.1 Search page (Google-like)
 
 **Home page:**
-- A large multicolor "Fleetboard" logo.
+- The Fleet Bharat logo (`frontend/public/fleet-bharat-logo.png`).
 - A rounded search box with autocomplete.
 - "Fleet Search" and "I'm Feeling Lucky" buttons. "I'm Feeling Lucky" opens the top result's source URL in a new tab.
 - Clickable sample queries.
@@ -287,17 +287,17 @@ These feeds were tested and are blocked or dead, so don't use them: ET Auto, Com
 - **Results page:** a horizontal "Top stories" strip and a News tab list with thumbnails.
 - **Images:** lazy-load them with `referrerPolicy="no-referrer"`. If an image fails, show a 🚚 placeholder. Some publisher image CDNs return 403. Don't proxy around a publisher's block.
 
-### 4.5 Fleetboard AI+ assistant workspace (the landing page)
+### 4.5 Fleet Bharat AI+ assistant workspace (the landing page)
 
 **Layout:**
-- **Left sidebar:** brand "Fleetboard AI+" and a one-line tagline; New chat; My fleet; AI agents; Custom agents; Saved; Schedules; Fleet apps; "Classic search" (the §4.1 page at `/search`); Help & support at the bottom.
+- **Left sidebar:** the Fleet Bharat logo with an "AI+" badge and a one-line tagline; New chat; My fleet; AI agents; Custom agents; Saved; Schedules; Fleet apps; "Classic search" (the §4.1 page at `/search`); Help & support at the bottom.
 - **Top bar:** a notifications bell with an unread count, and a profile chip showing initials, name and "Fleet Manager". The name is editable and stored in `localStorage`.
 - **Mobile (below 900 px):** the sidebar becomes a slide-in menu.
 - **Routing:** path-based with the History API (`/`, `/chat`, `/fleet?v=ID`, `/agents/:id`, `/custom-agents[/new|/:id|/:id/edit]`, `/saved[/:id]`, `/schedules`, `/apps`, `/help`, `/search`). No router library.
 
 **Home page:**
 - A greeting ("Hi <first name>, how can I help with your fleet today?") and a subtitle.
-- A decorative SVG truck. No external images and no copied brand assets.
+- The Fleet Bharat truck emblem (`frontend/public/fleet-bharat-emblem.png`). Brand colour: red `#C90F14`.
 - A prompt box ("Ask anything about your fleet…") with:
   - 4 mode chips: **Search** (effort low, web search on), **Deep analysis** (effort high, web search on), **Create report** (structured markdown report, then propose saving it), **Take action** (propose up to 5 actions).
   - A microphone using the Web Speech API, hidden when unsupported.

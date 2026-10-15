@@ -1,4 +1,4 @@
-# Fleetboard AI+
+# Fleet Bharat AI+
 
 An AI assistant for fleet managers (React + Spring Boot), backed by:
 
@@ -8,7 +8,7 @@ An AI assistant for fleet managers (React + Spring Boot), backed by:
 - live fleet news from publisher RSS feeds;
 - Claude (optional) for open-ended answers, tool use and web search.
 
-## Fleetboard AI+ (home page)
+## Fleet Bharat AI+ (home page)
 
 - **Ask anything about your fleet** with four modes: *Search* (quick), *Deep analysis* (thorough, high effort),
   *Create report* (structured report you can save) and *Take action* (proposes schedules, reminders, saves and fixes).

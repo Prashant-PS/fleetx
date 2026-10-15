@@ -124,7 +124,7 @@ export default function App() {
   return (
     <div className="results-page">
       <header className="results-header">
-        <button type="button" className="logo-button" onClick={() => goHome()} aria-label="Fleetboard home">
+        <button type="button" className="logo-button" onClick={() => goHome()} aria-label="Fleet Bharat home">
           <Logo size="small" />
         </button>
         <SearchBox value={query} onChange={setQuery} onSubmit={(q) => runSearch(q)} compact />
@@ -370,12 +370,7 @@ function SearchBox({ value, onChange, onSubmit, autoFocus, compact }) {
 }
 
 function Logo({ size }) {
-  const letters = ['F', 'l', 'e', 'e', 't', 'b', 'o', 'a', 'r', 'd'];
-  return (
-    <div className={`logo ${size}`} aria-label="Fleetboard">
-      {letters.map((l, i) => <span key={i} className={`c${i % 4}`}>{l}</span>)}
-    </div>
-  );
+  return <img className={`logo ${size}`} src="/fleet-bharat-logo.png" alt="Fleet Bharat" />;
 }
 
 function Footer() {

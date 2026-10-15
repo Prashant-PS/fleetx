@@ -1,12 +1,13 @@
-/* ================= Fleetboard AI+ shell ================= */
+/* ================= Fleet Bharat AI+ shell ================= */
 :root {
-  --page-bg: linear-gradient(160deg, #f5f8fe 0%, #ffffff 45%, #eef3fb 100%);
-  --sidebar-bg: #f7f9fc;
+  --page-bg: linear-gradient(160deg, #fff6f5 0%, #ffffff 45%, #fbf1f0 100%);
+  --sidebar-bg: #fbf8f8;
   --card: #ffffff;
-  --card-border: #e3e8f0;
-  --card-hover: #f3f6fc;
-  --accent-strong: #1b4fd8;
-  --accent-soft: #e8efff;
+  --card-border: #ece4e4;
+  --card-hover: #fcf3f2;
+  --brand: #c90f14;
+  --accent-strong: #c90f14;
+  --accent-soft: #fdecec;
   --shadow-sm: 0 1px 2px rgba(16, 24, 40, .06), 0 1px 3px rgba(16, 24, 40, .08);
   --shadow-md: 0 6px 24px rgba(16, 24, 40, .08);
   --high: #c5221f; --high-bg: #fce8e6;
@@ -17,13 +18,14 @@
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --page-bg: linear-gradient(160deg, #1b1f27 0%, #202124 50%, #1d2330 100%);
+    --page-bg: linear-gradient(160deg, #241c1c 0%, #202124 50%, #261d1e 100%);
     --sidebar-bg: #1c1f25;
     --card: #282b31;
     --card-border: #3a3f48;
     --card-hover: #30343c;
-    --accent-strong: #8ab4f8;
-    --accent-soft: #263451;
+    --brand: #ff5a5f;
+    --accent-strong: #ff8a80;
+    --accent-soft: #4a2124;
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, .4);
     --shadow-md: 0 6px 24px rgba(0, 0, 0, .45);
     --high: #f28b82; --high-bg: #4a2522;
@@ -42,9 +44,14 @@
   background: var(--sidebar-bg); border-right: 1px solid var(--card-border);
   position: sticky; top: 0; height: 100vh; overflow-y: auto;
 }
-.brand { display: flex; flex-direction: column; gap: 2px; padding: 4px 10px 18px; text-decoration: none; color: var(--text); }
-.brand-name { font-size: 22px; font-weight: 700; letter-spacing: -.3px; }
-.brand-name em { font-style: normal; color: var(--accent-strong); }
+.brand { display: flex; flex-direction: column; gap: 6px; padding: 0 6px 18px; text-decoration: none; color: var(--text); }
+.brand-logo { display: flex; align-items: center; gap: 8px; }
+.brand-logo img { width: 168px; height: auto; display: block; }
+.brand-logo em {
+  font-style: normal; font-weight: 800; font-size: 13px; color: #fff; background: var(--brand);
+  border-radius: 8px; padding: 3px 7px; letter-spacing: .3px;
+}
+@media (prefers-color-scheme: dark) { .brand-logo em { color: #202124; } }
 .brand-tag { font-size: 12px; color: var(--muted); }
 .sidebar nav { display: flex; flex-direction: column; gap: 2px; flex: 1; }
 .nav-item {
@@ -130,7 +137,7 @@
 .hero h1 span { display: block; font-weight: 500; }
 .hero-sub { color: var(--muted); margin: 10px 0 0; font-size: 15px; }
 .hero-art { display: flex; align-items: center; gap: 18px; flex-shrink: 0; }
-.truck-art { width: 220px; height: 120px; }
+.hero-emblem { width: 150px; height: 150px; filter: drop-shadow(0 8px 18px rgba(201, 15, 20, .18)); }
 .hero-motto { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); line-height: 1.9; border-left: 2px solid var(--accent); padding-left: 12px; }
 
 .prompt {

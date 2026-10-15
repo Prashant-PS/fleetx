@@ -49,7 +49,7 @@ public class ClaudeAnswerer {
     private static final int MAX_HISTORY_TURNS = 4;
 
     private static final String INSTRUCTIONS = """
-            You are the AI answer engine of "Fleetboard", a search page about fleets and commercial \
+            You are the AI answer engine of "Fleet Bharat", a search page about fleets and commercial \
             vehicles: trucks, buses, vans and LCVs; fleet management, telematics and connected services; \
             OEMs and their brands; specifications, powertrains and EVs; total cost of ownership, \
             maintenance, safety, regulation and market trends. Below is a research workbook comparing \

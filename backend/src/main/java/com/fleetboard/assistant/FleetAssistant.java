@@ -220,7 +220,7 @@ public class FleetAssistant {
     private String systemPrompt(String mode, String userName) {
         String today = LocalDate.now(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("EEEE d MMMM yyyy", Locale.ENGLISH));
         return """
-                You are Fleetboard AI+, the assistant of a fleet manager%s. Today is %s.
+                You are Fleet Bharat AI+, the assistant of a fleet manager%s. Today is %s.
 
                 You can see the user's fleet through tools: vehicles, live status, faults, service plans, fuel, \
                 AdBlue and battery levels, and compliance documents and contracts. %s Five agents check the fleet: \

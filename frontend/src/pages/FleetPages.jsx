@@ -192,7 +192,7 @@ const APPS = [
 export function FleetAppsPage() {
   return (
     <div className="page">
-      <PageHead title="Fleet apps" subtitle="Everything in Fleetboard, one click away." />
+      <PageHead title="Fleet apps" subtitle="Everything in Fleet Bharat, one click away." />
       <div className="apps-grid">
         {APPS.map((a) => (
           <Link key={a.name} to={a.to} className="app-tile">

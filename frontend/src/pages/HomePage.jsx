@@ -45,7 +45,7 @@ export default function HomePage({ userName, aiEnabled }) {
           <p className="hero-sub">Ask a question, get insights, and act on them, all in one place.</p>
         </div>
         <div className="hero-art" aria-hidden>
-          <TruckArt />
+          <img src="/fleet-bharat-emblem.png" alt="" className="hero-emblem" width="150" height="150" />
           <div className="hero-motto">Less firefighting.<br />More uptime.<br />Better decisions.</div>
         </div>
       </section>
@@ -103,7 +103,7 @@ export default function HomePage({ userName, aiEnabled }) {
       <section className="quick-row">
         <QuickCard to="/schedules" icon="calendar" title="My schedules" text={`${counts.schedules} active · automated reports and tasks`} />
         <QuickCard to="/saved" icon="bookmark" title="Saved" text={`${counts.saved} item${counts.saved === 1 ? '' : 's'} · your important insights and chats`} />
-        <QuickCard to="/apps" icon="apps" title="Fleet apps" text="Quick access to all Fleetboard applications" />
+        <QuickCard to="/apps" icon="apps" title="Fleet apps" text="Quick access to all Fleet Bharat applications" />
       </section>
     </div>
   );
@@ -137,31 +137,5 @@ function QuickCard({ to, icon, title, text }) {
       <span className="agent-text"><strong>{title}</strong><small>{text}</small></span>
       <Icon name="arrow" size={16} className="agent-arrow" />
     </Link>
-  );
-}
-
-/** A simple truck silhouette for the hero (no external images). */
-function TruckArt() {
-  return (
-    <svg viewBox="0 0 220 120" className="truck-art">
-      <defs>
-        <linearGradient id="road" x1="0" x2="1">
-          <stop offset="0" stopColor="var(--accent)" stopOpacity="0" />
-          <stop offset="1" stopColor="var(--accent)" stopOpacity="0.35" />
-        </linearGradient>
-      </defs>
-      <path d="M0 104 L220 92 L220 100 L0 116 Z" fill="url(#road)" />
-      <rect x="18" y="34" width="112" height="52" rx="5" fill="var(--truck-body)" />
-      <path d="M130 46 h34 l20 22 v18 h-54 z" fill="var(--truck-cab)" />
-      <path d="M140 52 h20 l13 14 h-33 z" fill="var(--truck-glass)" />
-      <rect x="18" y="80" width="166" height="8" rx="3" fill="var(--truck-cab)" />
-      {[44, 76, 150, 170].map((cx) => (
-        <g key={cx}>
-          <circle cx={cx} cy="92" r="10" fill="var(--truck-tyre)" />
-          <circle cx={cx} cy="92" r="4" fill="var(--truck-hub)" />
-        </g>
-      ))}
-      <path d="M30 46 h60" stroke="var(--accent)" strokeWidth="3" strokeLinecap="round" />
-    </svg>
   );
 }
