@@ -186,6 +186,14 @@ public class FleetRepository {
                 case 38 -> { nextService = null; }
                 default -> { }
             }
+            if (ev) {
+                // Engine, fuel and AdBlue issues planted above do not apply to electric vehicles.
+                fuelLevel = null;
+                adBlue = null;
+                if (faults.removeIf(fc -> fc.code().startsWith("P"))) {
+                    faults.add(fault(FAULTS[7], now, 2));
+                }
+            }
             out.add(new Vehicle(id, reg, vin, spec.make(), spec.model(), spec.type(), spec.fuel(), year,
                     DEPOTS[depot], driver, status, lastSeen, DEPOTS[depot] + " region", odometer, previousOdometer,
                     km7d, efficiency, idle, List.copyOf(faults), nextServiceKm, nextService, lastService,

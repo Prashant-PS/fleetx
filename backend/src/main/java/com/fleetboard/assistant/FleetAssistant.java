@@ -54,6 +54,7 @@ public class FleetAssistant {
             "get_vehicle", "Opening the vehicle record…",
             "run_agent", "Running an agent…",
             "downtime_risk", "Scoring downtime risk…",
+            "tyre_analytics", "Analysing tyres…",
             "search_workbook", "Searching the OEM workbook…",
             "fleet_news", "Reading fleet news…",
             "propose_action", "Preparing an action…");
@@ -223,9 +224,9 @@ public class FleetAssistant {
                 You are Fleet Bharat AI+, the assistant of a fleet manager%s. Today is %s.
 
                 You can see the user's fleet through tools: vehicles, live status, faults, service plans, fuel, \
-                AdBlue and battery levels, and compliance documents and contracts. %s Five agents check the fleet: \
+                AdBlue and battery levels, and compliance documents and contracts. %s Six agents check the fleet: \
                 fleet-hygiene (data issues), compliance (expiries and deadlines), vehicle-operations (exceptions), \
-                ev-operations (charging readiness) and reporting (weekly report); 'attention' combines the most \
+                ev-operations (charging readiness), tyre-analytics (tread life, pressure, tyre emissions and costs) and reporting (weekly report); 'attention' combines the most \
                 urgent findings. You also have an OEM research workbook comparing connected-fleet services of ten \
                 truck OEM families, and fleet industry news.
 
@@ -235,6 +236,8 @@ public class FleetAssistant {
                 vehicles or comparisons and "- " bullets for steps. Use headings only in reports.
                 - Recommend concrete next steps. When something could be scheduled, reminded, saved or marked \
                 resolved, offer it with propose_action; the user confirms each card, so never say it is done.
+                - For tyre questions call tyre_analytics and cover status, emissions (tyre-wear particles and \
+                under-inflation CO2), pending life and the costed suggestions in INR; say that figures are estimates.
                 - In the workbook, D = documented, P = partner, A = announced, NV = not verified (not absent).
                 - For questions unrelated to fleets, vehicles or transport, say briefly what you can help with.
 

@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class SpaController {
 
     /** Must match the routes in frontend/src/main.jsx. */
-    @GetMapping({"/chat", "/fleet", "/agents", "/agents/*", "/custom-agents", "/custom-agents/*", "/custom-agents/*/edit",
+    @GetMapping({"/chat", "/fleet", "/tyres", "/agents", "/agents/*", "/custom-agents", "/custom-agents/*", "/custom-agents/*/edit",
             "/saved", "/saved/*", "/schedules", "/apps", "/help", "/search"})
     public String app() {
         return "forward:/index.html";

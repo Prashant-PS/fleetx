@@ -424,3 +424,71 @@ blockquote { margin: 0 0 10px; padding: 4px 12px; border-left: 3px solid var(--a
 @media (max-height: 640px) {
   .chat-input { position: static; }
 }
+
+/* ---------- tire analytics ---------- */
+:root {
+  --t-replace: #c5221f; --t-due30: #e37400; --t-due90: #f9ab00; --t-ok: #188038;
+  --t-replace-bg: #fce8e6; --t-due30-bg: #feefe3; --t-due90-bg: #fef7e0; --t-ok-bg: #e6f4ea;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --t-replace: #f28b82; --t-due30: #fcad70; --t-due90: #fdd663; --t-ok: #81c995;
+    --t-replace-bg: #4a2522; --t-due30-bg: #46301b; --t-due90-bg: #3f361b; --t-ok-bg: #1e3a2a;
+  }
+}
+.agent-icon.tyre { background: #ececec; color: #3c4043; }
+@media (prefers-color-scheme: dark) { .agent-icon.tyre { background: #3a3d42; color: #e8eaed; } }
+.kpi.warn strong { color: var(--t-due30); }
+.tyre-panels { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px; }
+.panel { background: var(--card); border: 1px solid var(--card-border); border-radius: 16px; padding: 16px 18px; box-shadow: var(--shadow-sm); }
+.panel h2 { display: flex; align-items: center; gap: 8px; font-size: 16px; margin: 0 0 12px; }
+.panel h2 small { font-weight: 400; color: var(--muted); font-size: 12.5px; }
+.metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; }
+.metric { display: flex; flex-direction: column; gap: 2px; }
+.metric strong { font-size: 21px; }
+.metric span { font-size: 13px; }
+.metric small { color: var(--muted); font-size: 12px; }
+.cost-line { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 6px; font-size: 14px; }
+.saving { color: var(--ok); font-weight: 600; }
+.assumptions { margin-top: 26px; color: var(--muted); font-size: 13.5px; }
+.assumptions summary { cursor: pointer; color: var(--text); font-weight: 600; }
+.assumptions ul { margin: 8px 0 0; padding-left: 20px; line-height: 1.6; }
+
+.tyre-status { font-size: 12px; font-weight: 600; padding: 2px 10px; border-radius: 10px; white-space: nowrap; }
+.tyre-status.replace { background: var(--t-replace-bg); color: var(--t-replace); }
+.tyre-status.due30 { background: var(--t-due30-bg); color: var(--t-due30); }
+.tyre-status.due90, .tyre-status.attention { background: var(--t-due90-bg); color: var(--medium); }
+.tyre-status.ok { background: var(--t-ok-bg); color: var(--t-ok); }
+
+.vehicle-tyres h2 { margin: 0 0 4px; }
+.tyre-facts { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 13.5px; color: var(--muted); margin: 10px 0 14px; }
+.tyre-facts strong { color: var(--text); }
+.axles { background: var(--surface-2); border: 1px solid var(--card-border); border-radius: 14px; padding: 12px; }
+.axle-front { text-align: center; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.axle-row { display: grid; grid-template-columns: 1fr minmax(70px, 120px) 1fr; align-items: center; gap: 8px; margin: 8px 0; }
+.axle-side { display: flex; gap: 6px; justify-content: flex-end; }
+.axle-row .axle-side:last-child { justify-content: flex-start; }
+.axle-bar { height: 6px; border-radius: 3px; background: var(--card-border); position: relative; }
+.axle-bar span { position: absolute; left: 50%; top: -18px; transform: translateX(-50%); font-size: 11px; color: var(--muted); white-space: nowrap; }
+.tyre-chip {
+  width: 46px; height: 62px; border-radius: 10px; border: 2px solid transparent; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0;
+  font: inherit; color: #fff; box-shadow: inset 0 0 0 3px rgba(0, 0, 0, .15);
+  background-image: repeating-linear-gradient(0deg, rgba(0,0,0,.12) 0 4px, transparent 4px 9px);
+}
+.tyre-chip strong { font-size: 14px; }
+.tyre-chip small { font-size: 10px; opacity: .9; }
+.tyre-chip.replace { background-color: var(--t-replace); }
+.tyre-chip.due30 { background-color: var(--t-due30); }
+.tyre-chip.due90 { background-color: var(--t-due90); color: #3c2f00; }
+.tyre-chip.ok { background-color: var(--t-ok); }
+.tyre-chip.flagged { border-color: var(--text); border-style: dashed; }
+.tyre-chip.active { outline: 3px solid var(--accent); outline-offset: 2px; }
+@media (prefers-color-scheme: dark) { .tyre-chip { color: #202124; } }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--muted); margin-top: 10px; }
+.legend span { display: inline-flex; align-items: center; gap: 5px; }
+.dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+.dot.replace { background: var(--t-replace); } .dot.due30 { background: var(--t-due30); }
+.dot.due90 { background: var(--t-due90); } .dot.ok { background: var(--t-ok); }
+.dot.flagged { border: 2px dashed var(--text); }
+.tyre-detail { margin-top: 12px; font-size: 14px; }

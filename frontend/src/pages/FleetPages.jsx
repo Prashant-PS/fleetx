@@ -4,6 +4,7 @@ import { useChat } from '../chat/ChatContext.jsx';
 import { Link, navigate } from '../router.jsx';
 import Icon from '../ui/Icon.jsx';
 import { PageHead } from './AgentPages.jsx';
+import { VehicleTyres } from './TyrePages.jsx';
 
 const STATUSES = ['Moving', 'Idle', 'Stopped', 'Offline', 'In workshop'];
 
@@ -152,6 +153,9 @@ function VehicleDrawer({ id, onClose }) {
               </tbody>
             </table>
 
+            <h3>Tyres</h3>
+            <VehicleTyres id={v.id} />
+
             <h3>Open issues</h3>
             {data.findings.length === 0 ? <p className="muted">None.</p> : (
               <ul className="plain">{data.findings.map((f) => <li key={f.id}><span className={`sev ${f.severity}`}>{f.severity.toLowerCase()}</span> {f.title}: {f.action}</li>)}</ul>
@@ -179,7 +183,8 @@ function unit(v) {
 
 const APPS = [
   { to: '/fleet', icon: 'fleet', name: 'My fleet', text: 'Live status, health and documents of every vehicle' },
-  { to: '/agents', icon: 'agents', name: 'AI agents', text: 'Hygiene, compliance, operations, EV and reporting' },
+  { to: '/tyres', icon: 'tyre', name: 'Tire analytics', text: 'Tread life, tyre emissions and a costed plan' },
+  { to: '/agents', icon: 'agents', name: 'AI agents', text: 'Hygiene, compliance, operations, EV, tyres and reporting' },
   { to: '/custom-agents', icon: 'custom', name: 'Custom agents', text: 'Your own mix of checks' },
   { to: '/schedules', icon: 'calendar', name: 'Schedules', text: 'Automated reports and reminders' },
   { to: '/saved', icon: 'bookmark', name: 'Saved', text: 'Kept answers and reports' },
@@ -217,6 +222,7 @@ export function HelpPage({ aiEnabled }) {
           <li><strong>Search</strong>: quick answers from your fleet, the OEM research workbook, fleet news and the web.</li>
           <li><strong>Deep analysis</strong>: slower and more thorough; looks for patterns and root causes.</li>
           <li><strong>Create report</strong>: a structured report you can save and schedule.</li>
+          <li><strong>Tire analytics</strong>: ask "What is my fleet tire status?" or open Tire analytics for tread life, tyre emissions and a costed plan.</li>
           <li><strong>Take action</strong>: proposes schedules, reminders and fixes. Nothing happens until you press Confirm.</li>
         </ul>
         <p>Follow-up questions keep the conversation's context. Use the bookmark under an answer to keep it in Saved. The microphone button

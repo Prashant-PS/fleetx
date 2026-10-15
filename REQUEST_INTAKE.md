@@ -470,6 +470,62 @@ These feeds were tested and are blocked or dead, so don't use them: ET Auto, Com
 
 Return validation errors as 400 `{message}`. Configure CORS globally for `/api/**`.
 
+### 4.6 Tire analytics
+
+**Demo tyre data (`TyreRepository`):**
+- **Layouts:**
+  - Heavy trucks and tippers: 10 tyres (steer pair plus two dual drive axles).
+  - Medium trucks and buses: 6 tyres (steer pair plus one dual drive axle).
+  - LCVs: 4 tyres.
+- **Sizes and starting values:**
+
+  | Size | Used on | Price (Apollo) | Retread | New tread (steer / drive) | Pressure (steer / drive) |
+  |---|---|---|---|---|---|
+  | 295/80 R22.5 | heavy trucks, tippers, buses | ₹27,500 | ₹7,500 | 16 / 22 mm (bus drive 18) | 120 / 110 psi |
+  | 10.00 R20 | medium trucks | ₹22,000 | ₹6,000 | 15 / 19 mm | 115 / 105 psi |
+  | 155 R13 LT | LCVs | ₹4,200 | not retreadable | 8 mm | 50 / 55 psi |
+
+- **Brands and prices:** Apollo, MRF, JK Tyre, CEAT, Bridgestone and Michelin, with price factors from 0.95 to 1.24 applied to the base price.
+- **Fields per tyre:** position, serial, fitted date, retreads, new and current tread, irregular wear (shoulder difference), km run, pressure and recommended pressure, temperature.
+- **Planted issues:** worn below the limit, due within weeks, 24% and 13% under-inflated, misalignment, and a hot tyre (92 °C).
+
+**Calculations (`TyreAnalytics`):**
+- **Removal limit:** 4 mm on steer tyres, 3 mm on drive tyres, 1.6 mm on LCV tyres.
+- **Wear rate** = (new tread − current tread) ÷ km run.
+- **Remaining km** = (tread − limit) ÷ wear rate. Remaining days = remaining km ÷ the vehicle's average daily km. This gives the replace-by date.
+- **Status:** REPLACE_NOW, DUE_30, DUE_90 or OK.
+- **Flags:** 10%+ under-inflated; shoulder wear difference over 2 mm; above 85 °C.
+- **Emissions:**
+  - Tyre-wear particles (g/km) = wear rate (mm per 1,000 km) × rubber per mm (0.6 / 0.5 / 0.1 kg for the three sizes); summed per vehicle and multiplied by km per week.
+  - Under-inflation fuel penalty = 1% per 10% of average under-inflation. Turn it into CO₂ with 2.68 kg/l diesel, 2.75 kg/kg CNG or 0.71 kg/kWh, and into cost with ₹90/l, ₹82/kg or ₹9/kWh.
+- **Suggestions per tyre:**
+  - **Retread** for drive tyres with fewer than 2 retreads, under 6 years old, at least 1.6 mm of tread left and not hot. Otherwise **Replace**. Steer tyres are never retreaded.
+  - **Inspect heat** at no cost.
+- **Suggestions per vehicle:**
+  - **Inflate to spec:** no cost; the saving is the monthly cost of the fuel penalty.
+  - **Wheel alignment:** ₹1,800; it extends tyre life by about 15%.
+- **Urgency:** from status. HIGH for replace-now, a 20%+ under-inflated tyre, or heat.
+- **Fleet roll-up:**
+  - status counts and average tread left
+  - emissions
+  - cost plan: 30- and 90-day budget; counts of new tyres, retreads, alignments and inflation fixes; monthly saving; retread saving
+  - vehicles with the soonest replacements
+  - all recommendations
+  - the assumptions list
+
+**Wiring:**
+- **Agent:** a 6th agent, `tyre-analytics`, with checks tyre-replace-now (HIGH), tyre-due-soon (MEDIUM), tyre-under-inflated (HIGH at 20%+ low, otherwise MEDIUM), tyre-irregular-wear (LOW) and tyre-hot (HIGH).
+- **Downtime risk:** a worn tyre adds 20, a hot tyre 15, and a tyre 20%+ under-inflated 10.
+- **Weekly report:** gains a Tyres section.
+- **Chat without a key:** whole-word tyre terms (tyre/tire, tread, puncture, retread, TPMS) route to the fleet tyre report. If a vehicle is named, show that vehicle's tyre table instead. Action cards: a weekly tyre-check schedule, reminders 3 days before the next replacements, and saving the report.
+- **Chat with a key:** a `tyre_analytics(vehicle?)` tool, and a system prompt telling Claude to cover status, emissions, pending life and costs in ₹ as estimates.
+- **UI:**
+  - A **Tire analytics** page (`/tyres`) with KPIs, emission and cost-plan panels, a pending-life table, suggested actions with urgency filters, "Remind me" (a reminder 3 days before the due date), a weekly-check schedule, Ask AI+, and the assumptions.
+  - A vehicle drawer with an axle diagram (each tyre coloured by status, dashed outline when flagged, click for detail) and the vehicle's suggested actions.
+  - The same tyre section in the My fleet vehicle drawer.
+  - A sidebar entry, a Fleet apps tile, and a "What is my fleet tire status?" chip.
+- **Endpoints:** `GET /api/tyres` and `GET /api/tyres/vehicles/{id}`.
+
 ## 5. Other API endpoints
 
 | Endpoint | Returns |
@@ -544,6 +600,16 @@ Allow CORS from `http://localhost:5173`.
     - the stream contains status, delta, action and done events;
     - request 2 carries the run_agent result and request 3 the propose_action result, each in one user message with the matching `tool_use_id`;
     - every client tool definition has `eager_input_streaming: true`.
+
+17. **Tire analytics:** "What is my fleet tire status?" returns:
+    - status counts
+    - an emissions table (wear particles in kg and g per vehicle-km; extra CO₂ and ₹ from under-inflation)
+    - pending life for the vehicles with the soonest replacements
+    - suggested actions with ₹ cost and savings, plus the 30/90-day budget
+    - action cards for a weekly tyre-check schedule and replacement reminders
+
+    The query "entire fleet overview" must not trigger the tyre reply.
+18. **`/tyres` page:** shows the 5 KPIs, 6 metric cards, the pending-life table and actions. Clicking a vehicle opens an axle diagram whose tyre count matches the vehicle type.
 
 ## 8. Out of scope
 

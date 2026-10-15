@@ -13,6 +13,7 @@ import com.fleetboard.fleet.Vehicle;
 import com.fleetboard.news.NewsService;
 import com.fleetboard.search.SearchEngine;
 import com.fleetboard.store.Store;
+import com.fleetboard.tyres.TyreAnalytics;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
@@ -45,9 +46,11 @@ public class FleetTools {
     private final SearchEngine search;
     private final NewsService news;
     private final ObjectMapper json;
+    private final TyreAnalytics tyres;
 
     public FleetTools(FleetRepository fleet, AgentService agents, CustomAgentService customAgents, Store store,
-                      SearchEngine search, NewsService news, ObjectMapper json) {
+                      SearchEngine search, NewsService news, ObjectMapper json, TyreAnalytics tyres) {
+        this.tyres = tyres;
         this.fleet = fleet;
         this.agents = agents;
         this.customAgents = customAgents;
@@ -93,6 +96,12 @@ public class FleetTools {
                         Map.of("agent", Map.of("type", "string", "enum", agentIds)), List.of("agent")),
                 tool("downtime_risk", "Vehicles ranked by downtime risk score (0-100) with the reasons.",
                         Map.of("limit", Map.of("type", "integer", "description", "Max vehicles, default 10")), List.of()),
+                tool("tyre_analytics", "Tyre status. Without a vehicle: fleet summary with status counts, tyre "
+                        + "emissions (tyre-wear particles kg/week and g/km, extra CO2 and fuel cost from under-inflation), "
+                        + "vehicles with the soonest replacements (pending life), a costed action plan (replace, retread, "
+                        + "inflate, alignment; INR, indicative) with 30/90-day budget and savings, and the assumptions. With "
+                        + "a vehicle: every tyre's tread, life left in km and days, replace-by date, pressure and flags.",
+                        Map.of("vehicle", str("Optional vehicle id or registration")), List.of()),
                 tool("search_workbook", "Search the OEM research workbook: which of 10 truck OEM families offer 60 "
                         + "connected-fleet features (D documented, P partner, A announced, NV not verified), OEM STP, "
                         + "customer segments, service packages and sources.",
@@ -133,6 +142,26 @@ public class FleetTools {
                     .map(r -> Map.of("vehicle", r.vehicle().label(), "id", r.vehicle().id(), "status", r.vehicle().status(),
                             "score", r.score(), "reasons", r.reasons()))
                     .toList());
+            case "tyre_analytics" -> {
+                String vehicle = string(in, "vehicle");
+                if (vehicle == null || vehicle.isBlank()) {
+                    var f = tyres.fleet();
+                    Map<String, Object> m = new LinkedHashMap<>();
+                    m.put("demoData", FleetRepository.DEMO);
+                    m.put("vehicles", f.vehicles());
+                    m.put("tyres", f.tyres());
+                    m.put("statusCounts", f.statusCounts());
+                    m.put("avgTreadLeftPct", f.avgTreadLeftPct());
+                    m.put("emissionsThisWeek", f.emissions());
+                    m.put("costPlanInr", f.costPlan());
+                    m.put("vehiclesSoonestReplacement", f.vehiclesAtRisk().stream().limit(12).toList());
+                    m.put("recommendations", f.recommendations().stream().limit(25).toList());
+                    m.put("assumptions", f.assumptions());
+                    yield toJson(m);
+                }
+                yield toJson(fleet.find(vehicle).map(tyres::vehicle)
+                        .orElseThrow(() -> new ToolInputException("No vehicle " + vehicle)));
+            }
             case "search_workbook" -> toJson(search.search(required(in, "query"), 8).stream()
                     .map(h -> h.record().toContextLine()).toList());
             case "fleet_news" -> toJson(news.latest(string(in, "query"), 8).items().stream()

@@ -5,6 +5,8 @@ import com.fleetboard.fleet.FleetRepository;
 import com.fleetboard.fleet.Vehicle;
 import com.fleetboard.fleet.Vehicle.FleetDocument;
 import com.fleetboard.store.Store;
+import com.fleetboard.tyres.TyreAnalytics;
+import com.fleetboard.tyres.TyreAnalytics.TyreView;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -35,6 +37,7 @@ public class AgentService {
     public static final String OPERATIONS = "vehicle-operations";
     public static final String EV = "ev-operations";
     public static final String REPORTING = "reporting";
+    public static final String TYRES = "tyre-analytics";
 
     private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH);
 
@@ -66,6 +69,12 @@ public class AgentService {
                     new Check("charger-fault", "Charger faults"),
                     new Check("battery-health", "Battery health below 80%"),
                     new Check("low-soc", "State of charge below 25%"))),
+            new AgentDefinition(TYRES, "Tire Analytics", "Tracks tread life, pressure, emissions and tyre costs.", "tyre", List.of(
+                    new Check("tyre-replace-now", "Tyres worn to the removal limit"),
+                    new Check("tyre-due-soon", "Tyres to replace within 30 days"),
+                    new Check("tyre-under-inflated", "Tyres 10% or more below recommended pressure"),
+                    new Check("tyre-irregular-wear", "Irregular wear (alignment)"),
+                    new Check("tyre-hot", "Tyres running hot"))),
             new AgentDefinition(REPORTING, "Reporting", "Creates recurring reports and insights.", "reporting", List.of(
                     new Check("weekly-report", "Weekly fleet performance report"))));
 
@@ -93,10 +102,12 @@ public class AgentService {
 
     private final FleetRepository fleet;
     private final Store store;
+    private final TyreAnalytics tyres;
 
-    public AgentService(FleetRepository fleet, Store store) {
+    public AgentService(FleetRepository fleet, Store store, TyreAnalytics tyres) {
         this.fleet = fleet;
         this.store = store;
+        this.tyres = tyres;
     }
 
     public List<AgentDefinition> definitions() {
@@ -315,6 +326,37 @@ public class AgentService {
                         "Call the driver to confirm the vehicle's status."));
             }
 
+            // Tyres
+            if (checks.stream().anyMatch(c -> c.startsWith("tyre-"))) {
+                for (TyreView tv : tyres.vehicle(v).detail()) {
+                    String pos = tv.tyre().position();
+                    if (checks.contains("tyre-replace-now") && tv.status().equals("REPLACE_NOW")) {
+                        out.add(f(TYRES, "tyre-replace-now:" + pos, "HIGH", v, "Tyre worn out: " + pos,
+                                "Tread " + tv.tyre().treadMm() + " mm, at or below the " + tv.removalMm() + " mm limit.",
+                                "Replace or retread before the next trip; worn tyres raise blow-out and braking risk."));
+                    } else if (checks.contains("tyre-due-soon") && tv.status().equals("DUE_30")) {
+                        out.add(f(TYRES, "tyre-due-soon:" + pos, "MEDIUM", v, "Tyre due in " + tv.remainingDays() + " days: " + pos,
+                                "Tread " + tv.tyre().treadMm() + " mm, about " + String.format(Locale.ENGLISH, "%,d", tv.remainingKm())
+                                        + " km of life left.", "Order the tyre now and fit it at the next planned stop."));
+                    }
+                    if (checks.contains("tyre-under-inflated") && tv.pressureDeltaPct() <= -10) {
+                        out.add(f(TYRES, "tyre-under-inflated:" + pos, tv.pressureDeltaPct() <= -20 ? "HIGH" : "MEDIUM", v,
+                                "Under-inflated tyre: " + pos, tv.tyre().pressurePsi() + " psi against "
+                                        + tv.tyre().recommendedPsi() + " psi (" + tv.pressureDeltaPct() + "%).",
+                                "Inflate to spec and check for a slow puncture; it wastes fuel and wears the shoulders."));
+                    }
+                    if (checks.contains("tyre-irregular-wear") && tv.tyre().irregularWearMm() > 2.0) {
+                        out.add(f(TYRES, "tyre-irregular-wear:" + pos, "LOW", v, "Irregular wear: " + pos,
+                                tv.tyre().irregularWearMm() + " mm difference between shoulders.",
+                                "Book a wheel alignment (about ₹1,800)."));
+                    }
+                    if (checks.contains("tyre-hot") && tv.tyre().temperatureC() > 85) {
+                        out.add(f(TYRES, "tyre-hot:" + pos, "HIGH", v, "Tyre running hot: " + pos,
+                                tv.tyre().temperatureC() + " °C.", "Stop and check for overload, brake drag or a slow puncture."));
+                    }
+                }
+            }
+
             // EV operations
             if (v.electric()) {
                 if (checks.contains("not-departure-ready") && v.socPct() < v.requiredSocPct()
@@ -413,6 +455,20 @@ public class AgentService {
                 score += 15;
                 reasons.add("charger fault");
             }
+            List<TyreView> tyreViews = tyres.vehicle(v).detail();
+            long wornTyres = tyreViews.stream().filter(tv -> tv.status().equals("REPLACE_NOW")).count();
+            if (wornTyres > 0) {
+                score += 20;
+                reasons.add(wornTyres + " tyre" + (wornTyres == 1 ? "" : "s") + " worn to the limit");
+            }
+            if (tyreViews.stream().anyMatch(tv -> tv.tyre().temperatureC() > 85)) {
+                score += 15;
+                reasons.add("tyre running hot");
+            }
+            if (tyreViews.stream().anyMatch(tv -> tv.pressureDeltaPct() <= -20)) {
+                score += 10;
+                reasons.add("tyre 20%+ under-inflated");
+            }
             if (Duration.between(v.lastSeen(), now).toHours() > 24) {
                 score += 10;
                 reasons.add("offline " + Duration.between(v.lastSeen(), now).toHours() + " h");
@@ -485,6 +541,16 @@ public class AgentService {
             if (!a.id().equals(REPORTING)) {
                 sb.append("| ").append(a.name()).append(" | ").append(perAgent.getOrDefault(a.id(), 0L)).append(" |\n");
             }
+        }
+
+        if (filter == VehicleFilter.ALL) {
+            var t = tyres.fleet();
+            sb.append("\n## Tyres\n\n| Measure | Value |\n|---|---|\n")
+                    .append("| Replace now / within 30 days | ").append(t.statusCounts().get("REPLACE_NOW")).append(" / ")
+                    .append(t.statusCounts().get("DUE_30")).append(" |\n")
+                    .append("| Tyre budget, next 30 days | ₹").append(String.format(Locale.ENGLISH, "%,d", t.costPlan().next30DaysInr())).append(" |\n")
+                    .append("| Tyre-wear particles this week | ").append(t.emissions().wearParticlesKgPerWeek()).append(" kg |\n")
+                    .append("| Extra CO₂ from under-inflation | ").append(t.emissions().extraCo2KgPerWeek()).append(" kg |\n");
         }
 
         List<RiskEntry> risks = downtimeRisk(5).stream().filter(r -> filter.predicate().test(r.vehicle())).toList();

@@ -11,6 +11,7 @@ import com.fleetboard.search.Answer;
 import com.fleetboard.search.LocalAnswerer;
 import com.fleetboard.search.SearchEngine;
 import com.fleetboard.store.Store;
+import com.fleetboard.tyres.TyreAnalytics;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -36,6 +37,7 @@ public class LocalAssistant {
     private static final Pattern VEHICLE_ID = Pattern.compile("\\bV\\d{3}\\b", Pattern.CASE_INSENSITIVE);
     private static final Pattern REG_NO = Pattern.compile("\\b[A-Z]{2}\\s?\\d{2}\\s?[A-Z]{1,2}\\s?\\d{4}\\b",
             Pattern.CASE_INSENSITIVE);
+    private static final Pattern TYRE_WORDS = Pattern.compile("\\b(tyres?|tires?|tread|punctures?|retreads?|tpms)\\b");
     private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH);
 
     public record Reply(String text, List<ProposedAction> actions) {
@@ -46,9 +48,11 @@ public class LocalAssistant {
     private final SearchEngine search;
     private final LocalAnswerer workbook;
     private final NewsService news;
+    private final TyreAnalytics tyres;
 
     public LocalAssistant(AgentService agents, FleetRepository fleet, SearchEngine search, LocalAnswerer workbook,
-                          NewsService news) {
+                          NewsService news, TyreAnalytics tyres) {
+        this.tyres = tyres;
         this.agents = agents;
         this.fleet = fleet;
         this.search = search;
@@ -68,6 +72,9 @@ public class LocalAssistant {
         boolean report = mode.equals("report");
 
         Optional<Vehicle> vehicle = mentionedVehicle(message);
+        if (TYRE_WORDS.matcher(q).find()) {
+            return tyreReply(vehicle);
+        }
         if (vehicle.isPresent()) {
             return vehicleReply(vehicle.get());
         }
@@ -95,7 +102,7 @@ public class LocalAssistant {
         if (has(q, " ev", "ev ", "electric", "charg", "battery", "soc", "departure")) {
             return agentReply(AgentService.EV, "DAILY", "20:00");
         }
-        if (has(q, "fault", "idle", "idling", "service", "maintenance", "adblue", "tyre", "tire", "offline",
+        if (has(q, "fault", "idle", "idling", "service", "maintenance", "adblue", "offline",
                 "exception", "operation", "workshop")) {
             return agentReply(AgentService.OPERATIONS, "DAILY", "07:00");
         }
@@ -119,6 +126,29 @@ public class LocalAssistant {
         actions.add(schedule("Daily attention briefing", "attention", "DAILY", "07:00", null,
                 "Run this check every morning at 07:00 and notify me."));
         r.findings().stream().filter(f -> f.severity().equals("HIGH")).limit(2).forEach(f -> actions.add(resolve(f)));
+        return new Reply(text, actions);
+    }
+
+    private Reply tyreReply(Optional<Vehicle> vehicle) {
+        if (vehicle.isPresent()) {
+            return new Reply(tyres.vehicleMarkdown(vehicle.get()) + related("What is my fleet tire status?",
+                    "Show vehicles at risk of downtime", "What needs my attention today?"), List.of());
+        }
+        String text = tyres.fleetMarkdown() + related("Show tyres due for replacement this month",
+                "Which vehicles waste most fuel on tyre pressure?", "Create a weekly fleet report");
+        var plan = tyres.fleet();
+        List<ProposedAction> actions = new ArrayList<>();
+        actions.add(schedule("Weekly tyre check", AgentService.TYRES, "WEEKLY", "08:30", "MONDAY",
+                "Run Tire Analytics every Monday at 08:30 and notify me of worn and under-inflated tyres."));
+        plan.recommendations().stream().filter(r -> r.action().equals("Replace") || r.action().equals("Retread"))
+                .filter(r -> r.dueBy() != null && r.dueBy().isAfter(LocalDate.now().plusDays(2)))
+                .limit(2)
+                .forEach(r -> actions.add(new ProposedAction(Store.newId(), "create_reminder",
+                        r.action() + " " + r.position() + " on " + r.vehicle().split(" ")[0],
+                        "Remind me on " + DATE.format(r.dueBy().minusDays(3)) + " at 09:00 (budget ₹" + r.costInr() + ").",
+                        Map.of("date", r.dueBy().minusDays(3).toString(), "time", "09:00",
+                                "message", r.action() + " the " + r.position() + " tyre on " + r.vehicle() + ". " + r.reason()))));
+        actions.add(save("Tyre status · " + LocalDate.now(), tyres.fleetMarkdown()));
         return new Reply(text, actions);
     }
 
