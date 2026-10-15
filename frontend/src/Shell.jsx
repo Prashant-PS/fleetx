@@ -6,6 +6,7 @@ import Icon from './ui/Icon.jsx';
 
 const NAV = [
   { to: '/fleet', icon: 'fleet', label: 'My fleet' },
+  { to: '/uptime', icon: 'uptime', label: 'Uptime' },
   { to: '/tyres', icon: 'tyre', label: 'Tire analytics' },
   { to: '/agents', icon: 'agents', label: 'AI agents' },
   { to: '/custom-agents', icon: 'plus', label: 'Custom agents' },

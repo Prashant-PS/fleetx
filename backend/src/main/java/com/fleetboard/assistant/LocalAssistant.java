@@ -12,6 +12,8 @@ import com.fleetboard.search.LocalAnswerer;
 import com.fleetboard.search.SearchEngine;
 import com.fleetboard.store.Store;
 import com.fleetboard.tyres.TyreAnalytics;
+import com.fleetboard.uptime.UptimeAnalytics;
+import com.fleetboard.agents.ScheduleService;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -37,6 +39,8 @@ public class LocalAssistant {
     private static final Pattern VEHICLE_ID = Pattern.compile("\\bV\\d{3}\\b", Pattern.CASE_INSENSITIVE);
     private static final Pattern REG_NO = Pattern.compile("\\b[A-Z]{2}\\s?\\d{2}\\s?[A-Z]{1,2}\\s?\\d{4}\\b",
             Pattern.CASE_INSENSITIVE);
+    private static final Pattern UPTIME_WORDS = Pattern.compile(
+            "\\b(uptime|availability|mtbf|mttr|off[- ]road|vor|downtime|breakdowns?|triage|closure rate|unplanned stops?)\\b");
     private static final Pattern TYRE_WORDS = Pattern.compile("\\b(tyres?|tires?|tread|punctures?|retreads?|tpms)\\b");
     private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH);
 
@@ -49,9 +53,11 @@ public class LocalAssistant {
     private final LocalAnswerer workbook;
     private final NewsService news;
     private final TyreAnalytics tyres;
+    private final UptimeAnalytics uptime;
 
     public LocalAssistant(AgentService agents, FleetRepository fleet, SearchEngine search, LocalAnswerer workbook,
-                          NewsService news, TyreAnalytics tyres) {
+                          NewsService news, TyreAnalytics tyres, UptimeAnalytics uptime) {
+        this.uptime = uptime;
         this.tyres = tyres;
         this.agents = agents;
         this.fleet = fleet;
@@ -74,6 +80,10 @@ public class LocalAssistant {
         Optional<Vehicle> vehicle = mentionedVehicle(message);
         if (TYRE_WORDS.matcher(q).find()) {
             return tyreReply(vehicle);
+        }
+        // "at risk of downtime" keeps the risk table; other uptime questions get the uptime report.
+        if (UPTIME_WORDS.matcher(q).find() && !has(q, "risk")) {
+            return uptimeReply(q, vehicle);
         }
         if (vehicle.isPresent()) {
             return vehicleReply(vehicle.get());
@@ -127,6 +137,32 @@ public class LocalAssistant {
                 "Run this check every morning at 07:00 and notify me."));
         r.findings().stream().filter(f -> f.severity().equals("HIGH")).limit(2).forEach(f -> actions.add(resolve(f)));
         return new Reply(text, actions);
+    }
+
+    private Reply uptimeReply(String q, Optional<Vehicle> vehicle) {
+        if (vehicle.isPresent()) {
+            return new Reply(uptime.vehicleMarkdown(vehicle.get()) + related("What is my fleet uptime?",
+                    "Show vehicles at risk of downtime", "Which uptime features do my OEMs offer?"), List.of());
+        }
+        boolean featuresOnly = has(q, "feature", "service", "offer", "oem", "remote", "predictive", "diagnos")
+                && !has(q, "my fleet uptime", "how is", "kpi", "mtbf", "mttr", "availability");
+        if (featuresOnly) {
+            List<SearchEngine.Hit> hits = search.search("uptime remote service " + q, 10);
+            String pkg = hits.stream().filter(h -> h.record().sheet().equals("Service Packages")).findFirst()
+                    .map(h -> "\n\n**Uptime package (proposed in the workbook):** " + h.record().field("Included value")
+                            + ". Measured by: " + h.record().field("Measure of value") + ".").orElse("");
+            return new Reply("These are the OEM uptime and remote-service features (workbook theme \"Uptime & remote "
+                    + "service\") for the brands in your fleet:\n\n" + uptime.featuresMarkdown(uptime.features()) + pkg
+                    + related("What is my fleet uptime?", "Which OEMs offer predictive maintenance?",
+                    "Show vehicles at risk of downtime"), List.of());
+        }
+        int days = has(q, "90 days", "quarter", "3 months") ? 90 : has(q, "week", "7 days") ? 7 : 30;
+        String report = uptime.fleetMarkdown(days);
+        return new Reply(report + related("Show vehicles at risk of downtime", "Which uptime features do my OEMs offer?",
+                "What is my fleet tire status?"), List.of(
+                schedule("Weekly uptime report", ScheduleService.UPTIME_REPORT, "WEEKLY", "08:00", "MONDAY",
+                        "Send me the uptime report every Monday at 08:00."),
+                save("Uptime report · " + LocalDate.now(), report)));
     }
 
     private Reply tyreReply(Optional<Vehicle> vehicle) {

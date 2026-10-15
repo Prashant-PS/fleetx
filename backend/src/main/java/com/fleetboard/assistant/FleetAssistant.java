@@ -55,6 +55,7 @@ public class FleetAssistant {
             "run_agent", "Running an agent…",
             "downtime_risk", "Scoring downtime risk…",
             "tyre_analytics", "Analysing tyres…",
+            "uptime_analytics", "Calculating uptime…",
             "search_workbook", "Searching the OEM workbook…",
             "fleet_news", "Reading fleet news…",
             "propose_action", "Preparing an action…");
@@ -236,6 +237,11 @@ public class FleetAssistant {
                 vehicles or comparisons and "- " bullets for steps. Use headings only in reports.
                 - Recommend concrete next steps. When something could be scheduled, reminded, saved or marked \
                 resolved, offer it with propose_action; the user confirms each card, so never say it is done.
+                - For uptime, availability, downtime, breakdown, MTBF/MTTR or uptime-service questions call \
+                uptime_analytics: lead with uptime %% and vehicles available, then the Uptime package KPIs, what is off \
+                the road, the main causes, the cost of downtime and the improvement ideas. When asked about uptime \
+                features, use its features list (OEM status for the fleet's brands) and search_workbook for details; \
+                NV means not verified, not absent. The uptime report can be scheduled with agent 'uptime'.
                 - For tyre questions call tyre_analytics and cover status, emissions (tyre-wear particles and \
                 under-inflation CO2), pending life and the costed suggestions in INR; say that figures are estimates.
                 - In the workbook, D = documented, P = partner, A = announced, NV = not verified (not absent).

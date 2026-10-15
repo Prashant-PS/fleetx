@@ -14,6 +14,7 @@ import com.fleetboard.news.NewsService;
 import com.fleetboard.search.SearchEngine;
 import com.fleetboard.store.Store;
 import com.fleetboard.tyres.TyreAnalytics;
+import com.fleetboard.uptime.UptimeAnalytics;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
@@ -47,9 +48,12 @@ public class FleetTools {
     private final NewsService news;
     private final ObjectMapper json;
     private final TyreAnalytics tyres;
+    private final UptimeAnalytics uptime;
 
     public FleetTools(FleetRepository fleet, AgentService agents, CustomAgentService customAgents, Store store,
-                      SearchEngine search, NewsService news, ObjectMapper json, TyreAnalytics tyres) {
+                      SearchEngine search, NewsService news, ObjectMapper json, TyreAnalytics tyres,
+                      UptimeAnalytics uptime) {
+        this.uptime = uptime;
         this.tyres = tyres;
         this.fleet = fleet;
         this.agents = agents;
@@ -70,6 +74,8 @@ public class FleetTools {
     public List<Tool> definitions() {
         List<String> agentIds = new ArrayList<>(agents.definitions().stream().map(AgentDefinition::id).toList());
         agentIds.add(AgentService.ATTENTION);
+        List<String> schedulable = new ArrayList<>(agentIds);
+        schedulable.add("uptime");
         store.customAgents().forEach(a -> agentIds.add("custom:" + a.id()));
         String customList = store.customAgents().isEmpty() ? "none yet"
                 : store.customAgents().stream().map(a -> "custom:" + a.id() + " = " + a.name()).collect(Collectors.joining(", "));
@@ -96,6 +102,15 @@ public class FleetTools {
                         Map.of("agent", Map.of("type", "string", "enum", agentIds)), List.of("agent")),
                 tool("downtime_risk", "Vehicles ranked by downtime risk score (0-100) with the reasons.",
                         Map.of("limit", Map.of("type", "integer", "description", "Max vehicles, default 10")), List.of()),
+                tool("uptime_analytics", "Fleet uptime. Without a vehicle: uptime % over the window, planned vs "
+                        + "unplanned downtime hours, vehicles available now, the Uptime package KPIs (unplanned stops per "
+                        + "100,000 km, mean time to triage, closure rate within 48 h), MTBF km, MTTR hours, downtime cost "
+                        + "(lost revenue + repairs, INR), vehicles off the road now, downtime by cause, lowest-uptime vehicles, "
+                        + "weekly trend, vehicles at risk, improvement ideas with hours and INR saved, and the OEM uptime "
+                        + "features (workbook theme 'Uptime & remote service', F21-F30) for the fleet's brands with vehicle "
+                        + "coverage. With a vehicle: its uptime and downtime events.",
+                        Map.of("days", Map.of("type", "integer", "description", "Window in days, 7-90 (default 30)"),
+                                "vehicle", str("Optional vehicle id or registration")), List.of()),
                 tool("tyre_analytics", "Tyre status. Without a vehicle: fleet summary with status counts, tyre "
                         + "emissions (tyre-wear particles kg/week and g/km, extra CO2 and fuel cost from under-inflation), "
                         + "vehicles with the soonest replacements (pending life), a costed action plan (replace, retread, "
@@ -118,7 +133,8 @@ public class FleetTools {
                                 Map.entry("type", Map.of("type", "string", "enum", List.copyOf(ACTION_TYPES))),
                                 Map.entry("title", str("Short label, e.g. 'Weekly compliance check'")),
                                 Map.entry("description", str("One sentence explaining what will happen")),
-                                Map.entry("agent", Map.of("type", "string", "enum", agentIds)),
+                                Map.entry("agent", Map.of("type", "string", "enum", schedulable,
+                        "description", "Agent to schedule; 'uptime' schedules the uptime report")),
                                 Map.entry("cadence", Map.of("type", "string", "enum", List.copyOf(CADENCES))),
                                 Map.entry("time", str("Local time HH:mm")),
                                 Map.entry("day_of_week", Map.of("type", "string", "enum", List.of("MONDAY", "TUESDAY",
@@ -142,6 +158,15 @@ public class FleetTools {
                     .map(r -> Map.of("vehicle", r.vehicle().label(), "id", r.vehicle().id(), "status", r.vehicle().status(),
                             "score", r.score(), "reasons", r.reasons()))
                     .toList());
+            case "uptime_analytics" -> {
+                String vehicle = string(in, "vehicle");
+                int days = in.get("days") instanceof Number n ? n.intValue() : 30;
+                if (vehicle == null || vehicle.isBlank()) {
+                    yield toJson(uptime.fleet(days));
+                }
+                yield toJson(fleet.find(vehicle).map(v -> uptime.vehicle(v, days))
+                        .orElseThrow(() -> new ToolInputException("No vehicle " + vehicle)));
+            }
             case "tyre_analytics" -> {
                 String vehicle = string(in, "vehicle");
                 if (vehicle == null || vehicle.isBlank()) {

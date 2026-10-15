@@ -9,6 +9,7 @@ import { CustomAgentFormPage, CustomAgentRunPage, CustomAgentsPage } from './pag
 import { FleetAppsPage, HelpPage, MyFleetPage } from './pages/FleetPages.jsx';
 import HomePage from './pages/HomePage.jsx';
 import { TyresPage } from './pages/TyrePages.jsx';
+import { UptimePage } from './pages/UptimePages.jsx';
 import { SavedItemPage, SavedPage, SchedulesPage } from './pages/WorkspacePages.jsx';
 import { Link, useRoute } from './router.jsx';
 import Shell from './Shell.jsx';
@@ -73,6 +74,8 @@ function Page({ path, query, me, aiEnabled }) {
       return <MyFleetPage query={query} />;
     case 'tyres':
       return <TyresPage query={query} />;
+    case 'uptime':
+      return <UptimePage />;
     case 'agents':
       return parts[1] ? <AgentDetailPage id={parts[1]} /> : <AgentsPage />;
     case 'custom-agents':

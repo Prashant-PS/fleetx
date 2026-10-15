@@ -91,6 +91,7 @@ public class AssistantController {
                 log.error("Claude API call failed", e);
                 send(emitter, "error", Map.of("message", "The AI answer could not be generated."));
             } catch (IllegalStateException | IllegalArgumentException e) {
+                log.warn("Assistant request failed: {}", e.getMessage(), e);
                 send(emitter, "error", Map.of("message", e.getMessage()));
             } catch (ClientGoneException e) {
                 log.debug("Client disconnected during chat");

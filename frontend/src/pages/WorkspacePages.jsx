@@ -155,6 +155,6 @@ function describe(s, agents, custom) {
   }[s.cadence];
   const what = s.taskType === 'reminder' ? 'Reminder'
     : s.taskType === 'custom-agent' ? custom.find((c) => c.id === s.taskRef)?.name || 'Custom agent'
-      : s.taskRef === 'attention' ? 'Needs attention (all agents)' : agents.find((a) => a.id === s.taskRef)?.name || s.taskRef;
+      : s.taskRef === 'attention' ? 'Needs attention (all agents)' : s.taskRef === 'uptime' ? 'Uptime report' : agents.find((a) => a.id === s.taskRef)?.name || s.taskRef;
   return `${what} · ${when}`;
 }

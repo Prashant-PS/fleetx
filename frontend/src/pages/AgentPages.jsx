@@ -199,6 +199,7 @@ export function ScheduleForm({ preset, onDone, agents, customAgents }) {
             <select value={form.taskRef} onChange={set('taskRef')} required>
               <option value="">Choose…</option>
               <option value="attention">Needs attention today (all agents)</option>
+              <option value="uptime">Uptime report</option>
               {(agents || []).map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
             </select>
           </label>

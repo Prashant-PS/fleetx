@@ -492,3 +492,28 @@ blockquote { margin: 0 0 10px; padding: 4px 12px; border-left: 3px solid var(--a
 .dot.due90 { background: var(--t-due90); } .dot.ok { background: var(--t-ok); }
 .dot.flagged { border: 2px dashed var(--text); }
 .tyre-detail { margin-top: 12px; font-size: 14px; }
+
+/* ---------- uptime ---------- */
+.agent-icon.uptime { background: #e6f4ea; color: #137333; }
+@media (prefers-color-scheme: dark) { .agent-icon.uptime { background: #1e3a2a; color: #81c995; } }
+.kpi.good strong { color: var(--ok); }
+.segmented { display: inline-flex; border: 1px solid var(--card-border); border-radius: 20px; overflow: hidden; background: var(--card); }
+.segmented button { border: none; background: none; padding: 7px 12px; font-size: 13.5px; cursor: pointer; color: var(--text); }
+.segmented button.active { background: var(--accent-soft); color: var(--accent-strong); font-weight: 600; }
+.trend { display: flex; align-items: flex-end; gap: 6px; height: 150px; padding-top: 18px; }
+.trend-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; min-width: 0; }
+.trend-bar { width: 100%; max-width: 28px; background: var(--accent-strong); border-radius: 4px 4px 0 0; opacity: .85; }
+.trend-val { font-size: 10.5px; color: var(--muted); margin-bottom: 3px; }
+.trend-label { font-size: 10px; color: var(--muted); margin-top: 4px; white-space: nowrap; }
+.hbars { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.hbars li { display: grid; grid-template-columns: 130px 1fr 92px; gap: 10px; align-items: center; font-size: 13.5px; }
+.hbar-track { height: 10px; background: var(--surface-2); border-radius: 5px; overflow: hidden; }
+.hbar { display: block; height: 100%; background: var(--accent-strong); border-radius: 5px; }
+.hbar.planned { background: var(--muted); }
+.hbar-val { color: var(--muted); font-size: 12.5px; text-align: right; }
+.ideas { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.idea { background: var(--card); border: 1px solid var(--card-border); border-radius: 14px; padding: 14px 16px; box-shadow: var(--shadow-sm); }
+.idea p { margin: 6px 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
+.see-all.as-button { background: none; border: none; cursor: pointer; font: inherit; font-size: 14px; }
+.status.st-nv { background: var(--low-bg); color: var(--low); }
+@media (max-width: 600px) { .hbars li { grid-template-columns: 100px 1fr; } .hbar-val { grid-column: 2; text-align: left; } }

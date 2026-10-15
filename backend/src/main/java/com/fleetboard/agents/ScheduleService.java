@@ -3,6 +3,7 @@ package com.fleetboard.agents;
 import com.fleetboard.agents.AgentService.AgentResult;
 import com.fleetboard.store.Store;
 import com.fleetboard.store.Store.Schedule;
+import com.fleetboard.uptime.UptimeAnalytics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -30,9 +31,14 @@ public class ScheduleService {
     private final Store store;
     private final AgentService agents;
     private final CustomAgentService customAgents;
+    private final UptimeAnalytics uptime;
     private final ZoneId zone = ZoneId.systemDefault();
 
-    public ScheduleService(Store store, AgentService agents, CustomAgentService customAgents) {
+    /** Task reference for the uptime report (not an agent, so it is handled here). */
+    public static final String UPTIME_REPORT = "uptime";
+
+    public ScheduleService(Store store, AgentService agents, CustomAgentService customAgents, UptimeAnalytics uptime) {
+        this.uptime = uptime;
         this.store = store;
         this.agents = agents;
         this.customAgents = customAgents;
@@ -97,7 +103,23 @@ public class ScheduleService {
                     summary = s.message() == null ? s.title() : s.message();
                     store.notify("Reminder: " + s.title(), summary, "/schedules");
                 }
-                case "agent", "custom-agent" -> {
+                case "agent" -> {
+                    if (UPTIME_REPORT.equals(s.taskRef())) {
+                        var u = uptime.fleet(7);
+                        summary = "Uptime " + u.kpis().uptimePct() + "% this week; " + u.kpis().availableNow() + " of "
+                                + u.kpis().vehicles() + " vehicles available, " + u.offRoadNow().size() + " off the road.";
+                        var saved = store.addSaved("scheduled-report", s.title() + " · " + LocalDate.now(zone),
+                                "_" + summary + "_\n\n" + uptime.fleetMarkdown(7), "schedule:" + s.id());
+                        store.notify(s.title() + " is ready", summary, "/saved/" + saved.id());
+                        break;
+                    }
+                    AgentResult result = agents.run(s.taskRef());
+                    summary = result.summary();
+                    var saved = store.addSaved("scheduled-report", s.title() + " · " + LocalDate.now(zone),
+                            "_" + result.summary() + "_\n\n" + result.markdown(), "schedule:" + s.id());
+                    store.notify(s.title() + " is ready", result.summary(), "/saved/" + saved.id());
+                }
+                case "custom-agent" -> {
                     AgentResult result = s.taskType().equals("agent") ? agents.run(s.taskRef()) : customAgents.run(s.taskRef());
                     summary = result.summary();
                     var saved = store.addSaved("scheduled-report", s.title() + " · " + LocalDate.now(zone),
@@ -175,7 +197,7 @@ public class ScheduleService {
         }
         switch (r.taskType() == null ? "" : r.taskType()) {
             case "agent" -> {
-                if (!AgentService.ATTENTION.equals(r.taskRef())) {
+                if (!AgentService.ATTENTION.equals(r.taskRef()) && !UPTIME_REPORT.equals(r.taskRef())) {
                     agents.definition(r.taskRef());
                 }
             }
@@ -197,6 +219,7 @@ public class ScheduleService {
     private String defaultTitle(Request r) {
         return switch (r.taskType()) {
             case "agent" -> AgentService.ATTENTION.equals(r.taskRef()) ? "Daily attention briefing"
+                    : UPTIME_REPORT.equals(r.taskRef()) ? "Weekly uptime report"
                     : agents.definition(r.taskRef()).name() + " run";
             case "custom-agent" -> "Custom agent run";
             default -> "Reminder";

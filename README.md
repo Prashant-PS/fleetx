@@ -22,6 +22,13 @@ An AI assistant for fleet managers (React + Spring Boot), backed by:
   - *Tire Analytics*: tyres worn to the limit or due within 30 days, under-inflation, irregular wear, hot tyres
   - *Reporting*: weekly fleet report (KPIs, efficiency by fuel, open issues, downtime risk, actions)
   Findings can be resolved, saved, scheduled or handed to AI+.
+- **Uptime** (`/uptime`, or ask "What is my fleet uptime?" / "Which uptime features do my OEMs offer?"):
+  uptime % and vehicles available now, planned vs unplanned downtime, the workbook's Uptime-package KPIs (unplanned
+  stops per 100,000 km, mean time to triage, closure rate within 48 h), km between failures, mean time to repair,
+  downtime cost (lost revenue + repair and service bills, ₹), vehicles off the road now, downtime by cause, weekly
+  trend, lowest-uptime and at-risk vehicles, improvement ideas with hours and ₹ saved, and the OEM uptime features
+  (workbook F21–F30) for the fleet's brands. A weekly uptime report can be scheduled. Demo downtime history comes
+  from `DowntimeRepository`.
 - **Tire analytics** (`/tyres`, or ask "What is my fleet tire status?"): every tyre's tread, life left in km and
   days and replace-by date; estimated **tyre emissions** (tyre-wear particles in kg/week and g/km, extra CO₂ and fuel
   cost from under-inflation); a **costed plan** (replace, retread, inflate, wheel alignment, heat inspection) with
@@ -159,6 +166,7 @@ To try the production build locally: `docker build -t fleetboard . && docker run
 | `GET /api/fleet/summary`, `/api/fleet/vehicles`, `/api/fleet/vehicles/{id}`, `/api/fleet/facets` | fleet data |
 | `GET /api/agents`, `POST /api/agents/{id}/run` | built-in agents (`attention` = most urgent across agents) |
 | `GET/POST /api/custom-agents`, `PUT/DELETE /api/custom-agents/{id}`, `POST /api/custom-agents/{id}/run` | custom agents |
+| `GET /api/uptime?days=30`, `GET /api/uptime/vehicles/{id}?days=90` | uptime analytics for the fleet / one vehicle |
 | `GET /api/tyres`, `GET /api/tyres/vehicles/{id}` | tyre analytics for the fleet / one vehicle |
 | `POST /api/findings/{id}/resolve` | hide a finding once handled |
 | `GET/POST /api/schedules`, `PATCH/DELETE /api/schedules/{id}`, `POST /api/schedules/{id}/run` | schedules |

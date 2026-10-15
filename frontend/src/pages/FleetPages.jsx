@@ -5,6 +5,7 @@ import { Link, navigate } from '../router.jsx';
 import Icon from '../ui/Icon.jsx';
 import { PageHead } from './AgentPages.jsx';
 import { VehicleTyres } from './TyrePages.jsx';
+import { VehicleUptime } from './UptimePages.jsx';
 
 const STATUSES = ['Moving', 'Idle', 'Stopped', 'Offline', 'In workshop'];
 
@@ -153,6 +154,9 @@ function VehicleDrawer({ id, onClose }) {
               </tbody>
             </table>
 
+            <h3>Uptime (90 days)</h3>
+            <VehicleUptime id={v.id} />
+
             <h3>Tyres</h3>
             <VehicleTyres id={v.id} />
 
@@ -183,6 +187,7 @@ function unit(v) {
 
 const APPS = [
   { to: '/fleet', icon: 'fleet', name: 'My fleet', text: 'Live status, health and documents of every vehicle' },
+  { to: '/uptime', icon: 'uptime', name: 'Uptime', text: 'Availability, downtime, KPIs and OEM uptime services' },
   { to: '/tyres', icon: 'tyre', name: 'Tire analytics', text: 'Tread life, tyre emissions and a costed plan' },
   { to: '/agents', icon: 'agents', name: 'AI agents', text: 'Hygiene, compliance, operations, EV, tyres and reporting' },
   { to: '/custom-agents', icon: 'custom', name: 'Custom agents', text: 'Your own mix of checks' },
@@ -222,6 +227,7 @@ export function HelpPage({ aiEnabled }) {
           <li><strong>Search</strong>: quick answers from your fleet, the OEM research workbook, fleet news and the web.</li>
           <li><strong>Deep analysis</strong>: slower and more thorough; looks for patterns and root causes.</li>
           <li><strong>Create report</strong>: a structured report you can save and schedule.</li>
+          <li><strong>Uptime</strong>: ask "What is my fleet uptime?" or "Which uptime features do my OEMs offer?" for availability, downtime causes, the Uptime package KPIs, cost of downtime, improvement ideas and the OEM uptime services for your brands.</li>
           <li><strong>Tire analytics</strong>: ask "What is my fleet tire status?" or open Tire analytics for tread life, tyre emissions and a costed plan.</li>
           <li><strong>Take action</strong>: proposes schedules, reminders and fixes. Nothing happens until you press Confirm.</li>
         </ul>

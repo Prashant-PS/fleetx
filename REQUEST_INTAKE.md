@@ -526,6 +526,50 @@ Return validation errors as 400 `{message}`. Configure CORS globally for `/api/*
   - A sidebar entry, a Fleet apps tile, and a "What is my fleet tire status?" chip.
 - **Endpoints:** `GET /api/tyres` and `GET /api/tyres/vehicles/{id}`.
 
+### 4.7 Uptime
+
+**Demo downtime history (`DowntimeRepository`, last 90 days, fixed seed):**
+- **Planned services:** about every 40–55 days, 6–14 h each, ₹8,000–22,000.
+- **Unplanned breakdowns:** 0–3 per vehicle; more for vehicles 5+ years old or over 2,200 km a week.
+- **Causes:** Engine, Aftertreatment, Cooling, Electrical, Battery & charging, Tyres, Brakes and Transmission, each with its own duration and cost range. EVs only get EV-relevant causes, weighted towards battery and charging.
+- **Fields per event:** triage hours and location (roadside or depot).
+- **Ongoing events** match the vehicle's state: a vehicle in the workshop, or stopped with a critical fault, has an open breakdown.
+
+**Calculations (`UptimeAnalytics`, window 7–90 days, default 30):**
+- **Uptime** = 1 − downtime hours ÷ (vehicles × hours). Planned and unplanned downtime are split.
+- **Available now** = vehicles with no ongoing event.
+- **Uptime package KPIs** (from the workbook's "Uptime" package):
+  - unplanned stops per 100,000 km
+  - mean time to triage
+  - closure rate: unplanned stops fixed within 48 h
+- **Reliability:** MTBF in km (fleet km ÷ unplanned stops) and MTTR (mean hours per closed breakdown).
+- **Downtime cost** = lost revenue (vehicle-days off × ₹/day: heavy truck 9,000, tipper 8,000, medium truck 6,000, bus 12,000, LCV 2,500) + repair and service bills.
+- **Breakdowns of the data:** downtime by cause (hours and share), weekly trend, the lowest-uptime vehicles, and at-risk vehicles (downtime-risk score ≥ 35, not already off the road).
+- **Improvement ideas** (each with vehicle-hours and ₹ saved per month):
+  1. Get off-road vehicles back to work, with the cost per day.
+  2. Diagnose faster through remote diagnostics and dealer triage (F21, F24), cutting triage to about 2 h.
+  3. Reduce the largest unplanned cause by about 35%: predictive maintenance (F23), the tyre plan, EV operations, or pre-trip inspection (F30).
+  4. Service off-peak, saving about 30% of planned hours (F22).
+  5. Fix at-risk vehicles first.
+- **OEM uptime features:** every workbook feature with theme "Uptime & remote service" (F21–F30), with D/P/NV status for each fleet OEM and the count of vehicles covered.
+  - Make-to-OEM mapping: Tata Motors → Tata Motors; Ashok Leyland → Ashok Leyland; BharatBenz → Daimler Truck; Volvo → Volvo Group.
+  - Eicher, Switch Mobility and EKA are not covered by the workbook.
+- **Assumptions:** listed in the response and shown on the page.
+
+**Wiring:**
+- **Chat without a key:** whole-word uptime terms (uptime, availability, MTBF, MTTR, off-road, VOR, downtime, breakdown, triage, closure rate, unplanned stops) route to the uptime report, except "risk" questions, which keep the risk table.
+  - Questions about features, services or OEMs get the feature table plus the workbook's Uptime package.
+  - A named vehicle gets its downtime history.
+  - "Week" and "quarter" set the window.
+  - Action cards: schedule a weekly uptime report; save the report.
+- **Chat with a key:** a `uptime_analytics(days?, vehicle?)` tool. `propose_action` can schedule agent `uptime`.
+- **Schedules:** the task ref `uptime` runs the uptime report, saves it, and sends a notification.
+- **UI:**
+  - An **Uptime** page with a 7/30/90-day selector, 8 KPIs, a weekly trend chart (axis floor labelled), a cause bar chart, vehicles off the road (with Ask AI+), improvement ideas, lowest-uptime and at-risk lists, the OEM feature table, and the assumptions.
+  - The My fleet vehicle drawer shows 90-day uptime and its events.
+  - A sidebar entry, a Fleet apps tile, and a "What is my fleet uptime?" chip.
+- **Endpoints:** `GET /api/uptime?days=` and `GET /api/uptime/vehicles/{id}?days=`.
+
 ## 5. Other API endpoints
 
 | Endpoint | Returns |
@@ -610,6 +654,12 @@ Allow CORS from `http://localhost:5173`.
 
     The query "entire fleet overview" must not trigger the tyre reply.
 18. **`/tyres` page:** shows the 5 KPIs, 6 metric cards, the pending-life table and actions. Clicking a vehicle opens an axle diagram whose tyre count matches the vehicle type.
+
+19. **Uptime:**
+    - "What is my fleet uptime?" returns uptime %, vehicles available, the Uptime package KPIs, MTBF/MTTR, downtime cost, vehicles off the road, causes, the lowest-uptime vehicles, improvement ideas and the OEM uptime features, with a weekly-report schedule card.
+    - "Which uptime features do my OEMs offer?" returns the F21–F30 table for the fleet's OEMs.
+    - "Show vehicles at risk of downtime" still returns the risk table.
+    - With the mock API, the assistant calls `uptime_analytics` and gets non-error JSON. The system prompt must escape `%` (it is built with `String.formatted`).
 
 ## 8. Out of scope
 

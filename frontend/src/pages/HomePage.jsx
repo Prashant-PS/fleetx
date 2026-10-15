@@ -11,6 +11,7 @@ const TRY_ASKING = [
   'Create a weekly fleet report',
   'Remind me of expiring contracts',
   'What is my fleet tire status?',
+  'What is my fleet uptime?',
 ];
 
 export default function HomePage({ userName, aiEnabled }) {
